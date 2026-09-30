@@ -241,3 +241,4 @@ form.stack{display:flex;flex-direction:column;gap:10px}
 .stack{display:flex;flex-direction:column;gap:10px}
 .quota .line span.warn{color:var(--bad)}
 .track i.bad{background:var(--bad)}
+button.icon{border:0;padding:0;cursor:pointer;font:inherit}
