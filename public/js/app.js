@@ -1,4 +1,4 @@
-import { L, t, pl, getLang, setLangValue, pickLang } from './i18n.js';
+import { L, t, pl, unit, getLang, setLangValue, pickLang } from './i18n.js';
 import { qrSvg } from './qr.js';
 import * as API from './api.js';
 
@@ -217,9 +217,9 @@ function setTab(text) {
 }
 
 function ttlLabel(sec) {
-  if (sec % 86400 === 0) { const d = sec / 86400; return d === 1 ? t('ttl_day') : pl(d, 'day'); }
-  if (sec % 3600 === 0) return pl(sec / 3600, 'hour');
-  return pl(Math.round(sec / 60), 'min');
+  if (sec % 86400 === 0) return unit(sec / 86400, 'day');
+  if (sec % 3600 === 0) return unit(sec / 3600, 'hour');
+  return unit(Math.round(sec / 60), 'min');
 }
 
 let TTL = null;
@@ -648,7 +648,6 @@ function paintMine() {
     const row = item(f.name, sub, partial ? 'dim' : '');
     if (partial) {
       row.querySelector('.nm span').classList.add('warn');
-      row.querySelector('.nm span').title = t('resume_hint');
     } else {
       const a = el('a', 'icon');
       a.innerHTML = ICON_DL;

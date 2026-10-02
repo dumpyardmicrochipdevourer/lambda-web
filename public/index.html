@@ -45,7 +45,6 @@
       <button class="zone" id="zone" type="button">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="m7.5 8.5 4.5-4.5 4.5 4.5"/><path d="M4 16v2.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V16"/></svg>
         <b data-t="drop">перетащите файлы</b>
-        <span data-t="drop_sub">или нажмите</span>
       </button>
       <div class="ttls" id="ttls" role="group" data-t-aria="ttl_aria"></div>
       <button class="btn" type="button" id="send-text" hidden data-t="send_text">отправить</button>
@@ -123,7 +122,7 @@
         <input class="fld" id="l-pw" type="password" autocomplete="current-password" placeholder="пароль" data-t-ph="pw_ph">
         <span class="err-line" id="l-err" hidden></span>
         <button class="btn" type="submit" id="l-go" data-t="signin">войти</button>
-        <span class="hint"><span data-t="have_invite">есть приглашение?</span> <a href="#register" data-t="register_link">регистрация</a></span>
+        <span class="hint"><a href="#register" data-t="register_link">регистрация</a></span>
       </form>
     </section>
 
@@ -131,17 +130,16 @@
       <form class="stack" id="reg-form">
         <div class="lead">
           <b data-t="reg_t">регистрация</b>
-          <span data-t="reg_sub">по приглашению от админа</span>
         </div>
         <label class="sr" for="r-invite" data-t="invite_l">Приглашение</label>
-        <input class="fld" id="r-invite" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="код приглашения" data-t-ph="invite_ph">
+        <input class="fld" id="r-invite" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="инвайт" data-t-ph="invite_ph">
         <label class="sr" for="r-name" data-t="name_l">Имя</label>
-        <input class="fld" id="r-name" type="text" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="имя: латиница, цифры, _" data-t-ph="reg_name_ph" maxlength="32">
+        <input class="fld" id="r-name" type="text" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="имя" data-t-ph="name_ph" maxlength="32">
         <label class="sr" for="r-pw" data-t="pw_l">Пароль</label>
-        <input class="fld" id="r-pw" type="password" autocomplete="new-password" placeholder="пароль, от 8 символов" data-t-ph="reg_pw_ph">
+        <input class="fld" id="r-pw" type="password" autocomplete="new-password" placeholder="пароль" data-t-ph="pw_ph">
         <span class="err-line" id="r-err" hidden></span>
         <button class="btn" type="submit" id="r-go" data-t="reg_go">создать аккаунт</button>
-        <span class="hint"><span data-t="have_account">уже есть аккаунт?</span> <a href="#login" data-t="signin">войти</a></span>
+        <span class="hint"><a href="#login" data-t="signin">войти</a></span>
       </form>
     </section>
 
@@ -149,7 +147,6 @@
       <form class="stack" id="pw-form">
         <div class="lead">
           <b id="acc-name">—</b>
-          <span data-t="pw_change_sub">смена пароля завершит вход на остальных устройствах</span>
         </div>
         <input class="sr" type="text" autocomplete="username" id="acc-user" tabindex="-1" aria-hidden="true">
         <label class="sr" for="p-old" data-t="pw_old_ph">текущий пароль</label>
@@ -174,7 +171,6 @@
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="m7.5 8.5 4.5-4.5 4.5 4.5"/><path d="M4 16v2.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V16"/></svg>
         <span class="txt">
           <b data-t="drop">перетащите файлы</b>
-          <span data-t="drop_sub">или нажмите</span>
         </span>
       </button>
     </section>
