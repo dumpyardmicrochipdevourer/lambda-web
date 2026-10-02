@@ -54,6 +54,9 @@ docker build -t lambda-web .
 docker run -e AUTH_UPSTREAM=auth:8081 -e CORE_UPSTREAM=core:8080 -p 8090:8080 lambda-web
 ```
 
+`TRUSTED_PROXY` is the address (CIDR) of a reverse proxy in front, whose
+`X-Forwarded-For` is believed; rate limits are per client address.
+
 Upstreams are resolved through Docker's DNS, so the container is meant to sit in
 the same compose project as the services; `lambda-deploy` does that.
 
