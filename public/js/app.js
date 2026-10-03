@@ -89,6 +89,7 @@ function emsg(e) {
   if (!e) return '';
   if (e.status === 0) return t(e.aborted ? 'e_abort' : 'e_net');
   if (e.status === 429) return t('too_often');
+  if (e.status === 507) return t('full');
   return e.message || ('HTTP ' + e.status);
 }
 
