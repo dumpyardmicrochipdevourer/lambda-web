@@ -37,6 +37,8 @@ server {
     }
 
     location /api/auth/ { proxy_pass $auth; }
+    # public signing key: other services of the same accounts verify tokens with it
+    location = /.well-known/jwks.json { proxy_pass $auth; }
     location /api/invites { proxy_pass $auth; }
     location /api/users { proxy_pass $auth; }
 
