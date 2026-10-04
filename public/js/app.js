@@ -861,12 +861,29 @@ $('inv-new').onclick = async () => {
 async function loadUsers() {
   const list = await adminCall(() => API.api('/api/users', { auth: true }));
   if (!list) return;
+  // names an admin can tick: the services that take "sign in with pathos"
+  const services = (await adminCall(() => API.api('/api/users/services', { auth: true }))) || [];
   const paint = () => {
     const box = $('adm-users');
     box.innerHTML = '';
     list.forEach((u) => {
-      const bits = [u.role === 'ADMIN' ? t('role_admin') : null, u.enabled ? t('enabled') : t('disabled'), when(u.createdAt)];
+      const isAdmin = u.role === 'ADMIN';
+      const bits = [isAdmin ? t('role_admin') : null, u.enabled ? t('enabled') : t('disabled'), when(u.createdAt)];
       const row = item(u.username, bits.filter(Boolean).join(' · '), u.enabled ? '' : 'dim');
+      if (!isAdmin) {
+        services.forEach((service) => {
+          const on = (u.access || []).includes(service);
+          const b = el('button', on ? 'mini on' : 'mini off', t('svc_' + service) === 'svc_' + service ? service : t('svc_' + service));
+          b.type = 'button';
+          b.setAttribute('aria-pressed', String(on));
+          b.onclick = async () => {
+            const access = on ? u.access.filter((x) => x !== service) : [...(u.access || []), service];
+            const v = await adminCall(() => API.api('/api/users/' + u.id, { method: 'PATCH', auth: true, json: { access } }));
+            if (v) { Object.assign(u, v); paint(); }
+          };
+          row.append(b);
+        });
+      }
       if (u.id === ME.id) {
         row.append(el('span', 'tag-pill', t('you')));
       } else {

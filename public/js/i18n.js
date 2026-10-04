@@ -128,7 +128,8 @@ export const L = {
     mark_read: "прочитано",
     partial: "не докачан · {0} из {1}",
     adm_fail: "не удалось: {0}",
-    you: "это вы"
+    you: "это вы",
+    svc_forum: "форум"
   },
   en: {
     home_aria: "{0} — home",
@@ -258,7 +259,8 @@ export const L = {
     mark_read: "read",
     partial: "unfinished · {0} of {1}",
     adm_fail: "failed: {0}",
-    you: "you"
+    you: "you",
+    svc_forum: "forum"
   }
 };
 
