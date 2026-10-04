@@ -6,7 +6,7 @@ nginx serves the page and proxies the API:
 
 | path | goes to |
 |---|---|
-| `/api/auth/*`, `/api/invites`, `/api/users` | lambda-auth |
+| `/api/auth/*`, `/api/invites`, `/api/users` | pathos-auth |
 | `/api/share/*`, `/api/files/*`, `/api/feedback` | lambda-core |
 | everything else | `public/` |
 
