@@ -6,7 +6,7 @@ nginx serves the page and proxies the API:
 
 | path | goes to |
 |---|---|
-| `/api/auth/*`, `/api/invites`, `/api/users` | pathos-auth |
+| `/api/auth/*` | pathos-auth |
 | `/api/share/*`, `/api/files/*`, `/api/feedback` | lambda-core |
 | everything else | `public/` |
 
@@ -27,8 +27,10 @@ change at `/#account`. The access token lives in memory, the refresh token in
 `localStorage`; refreshes are serialized across tabs because a refresh token
 works only once.
 
-**Admin** (`/#admin`, admins only): invites, people (disable / enable),
-feedback inbox. Feedback itself is a sheet open to anyone.
+**Feedback** is a sheet open to anyone, in the footer. Whoever administers the accounts does
+it on `admin.pathos.su` (pathos-admin): invites, people,
+the feedback inbox. There is no admin screen here (an old `/#admin` bookmark is sent there); an invite made
+there is a link back to `/#invite/<code>` on this page.
 
 Russian and English, picked by the browser and switchable in the footer.
 Light and dark follow the system. Phone and desktop share one layout.
@@ -63,5 +65,5 @@ the same compose project as the services; `lambda-deploy` does that.
 End-to-end check against a running stack (Playwright):
 
 ```sh
-node e2e/stack.mjs http://127.0.0.1:8090 admin '<admin password>' /tmp/shots
+node e2e/stack.mjs http://127.0.0.1:8090 admin '<admin password>' http://<pathos-auth host:port> /tmp/shots
 ```

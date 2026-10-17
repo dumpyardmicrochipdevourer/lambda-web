@@ -26,7 +26,6 @@
     <nav class="seg">
       <a href="#" id="nav-x" data-t="nav_x">обменник</a>
       <a href="#files" id="nav-f" data-t="nav_f">мои файлы</a>
-      <a href="#admin" id="nav-a" data-t="nav_a" hidden>админка</a>
     </nav>
     <div class="who">
       <a href="#account" id="who-name"></a>
@@ -173,29 +172,6 @@
           <b data-t="drop">перетащите файлы</b>
         </span>
       </button>
-    </section>
-
-    <section id="s-admin" hidden>
-      <div class="tabs">
-        <button type="button" data-admin="invites" class="on" data-t="adm_invites">приглашения</button>
-        <button type="button" data-admin="users" data-t="adm_users">люди</button>
-        <button type="button" data-admin="feedback" data-t="adm_feedback">обратная связь</button>
-      </div>
-      <div class="stack" id="adm-invites">
-        <div class="row">
-          <button class="btn" type="button" id="inv-new" data-t="inv_new">новое приглашение</button>
-        </div>
-        <div class="link" id="inv-out" hidden>
-          <span id="inv-link"></span>
-          <button class="copy" type="button" id="inv-copy" data-t-aria="copy_aria">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="3"/><path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1"/></svg>
-          </button>
-        </div>
-        <div class="list" id="inv-list"></div>
-      </div>
-      <div class="list" id="adm-users" hidden></div>
-      <div class="list" id="adm-feedback" hidden></div>
-      <span class="err-line" id="adm-err" hidden></span>
     </section>
 
   </div>

@@ -14,7 +14,7 @@ const CFG = {
 
 const $ = (id) => document.getElementById(id);
 const SCREENS = ['s-idle', 's-upload', 's-ready', 's-recv', 's-err', 's-login', 's-register',
-  's-account', 's-files', 's-admin'];
+  's-account', 's-files'];
 
 let REPAINT = null;
 let ME = null;
@@ -137,7 +137,7 @@ const ICON_RM = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" str
 function show(id) {
   REPAINT = null;
   SCREENS.forEach((s) => { $(s).hidden = s !== id; });
-  $('card').classList.toggle('wide', id === 's-files' || id === 's-admin');
+  $('card').classList.toggle('wide', id === 's-files');
   paintTop();
 }
 
@@ -188,12 +188,9 @@ function paintTop() {
   $('foot-my').hidden = on;
   if (!on) return;
   $('who-name').textContent = ME.username;
-  $('nav-a').hidden = ME.role !== 'ADMIN';
   const mine = !$('s-files').hidden || !$('s-account').hidden;
-  const admin = !$('s-admin').hidden;
   $('nav-f').className = mine ? 'on' : '';
-  $('nav-a').className = admin ? 'on' : '';
-  $('nav-x').className = mine || admin ? '' : 'on';
+  $('nav-x').className = mine ? '' : 'on';
 }
 
 /* ------------------------------------------------------------ swap: home */
@@ -782,156 +779,6 @@ async function sendMine(list) {
   }
 }
 
-/* ------------------------------------------------------------ admin */
-
-let ADMIN_TAB = 'invites';
-
-function admin() {
-  if (!ME) { showLogin(); return; }
-  if (ME.role !== 'ADMIN') { location.hash = ''; return; }
-  show('s-admin');
-  adminTab(ADMIN_TAB);
-}
-
-function adminTab(name) {
-  ADMIN_TAB = name;
-  document.querySelectorAll('[data-admin]').forEach((b) => {
-    b.classList.toggle('on', b.dataset.admin === name);
-    b.setAttribute('aria-pressed', String(b.dataset.admin === name));
-  });
-  $('adm-invites').hidden = name !== 'invites';
-  $('adm-users').hidden = name !== 'users';
-  $('adm-feedback').hidden = name !== 'feedback';
-  $('adm-err').hidden = true;
-  ({ invites: loadInvites, users: loadUsers, feedback: loadFeedback })[name]();
-}
-
-document.querySelectorAll('[data-admin]').forEach((b) => { b.onclick = () => adminTab(b.dataset.admin); });
-
-async function adminCall(fn) {
-  try {
-    return await fn();
-  } catch (e) {
-    if (lostSession(e)) return undefined;
-    $('adm-err').textContent = t('adm_fail', emsg(e));
-    $('adm-err').hidden = false;
-    return undefined;
-  }
-}
-
-function inviteLink(code) {
-  return location.origin + location.pathname + '#invite/' + code;
-}
-
-async function loadInvites() {
-  const list = await adminCall(() => API.api('/api/invites', { auth: true }));
-  if (!list) return;
-  const paint = () => {
-    const box = $('inv-list');
-    box.innerHTML = '';
-    if (!list.length) { box.append(item(t('inv_none'), '')); return; }
-    list.forEach((inv) => {
-      const expiredNow = !inv.usedBy && new Date(inv.expiresAt) <= new Date();
-      const sub = inv.usedBy ? t('inv_used', inv.usedBy) + ' · ' + when(inv.usedAt)
-        : expiredNow ? t('inv_expired') : t('inv_until', shortDate(new Date(inv.expiresAt)));
-      const row = item(inv.code.slice(0, 12) + '…', sub, inv.usedBy || expiredNow ? 'dim' : '');
-      if (!inv.usedBy && !expiredNow) {
-        const c = el('button', 'mini', t('copy'));
-        c.type = 'button';
-        c.onclick = () => copyText(inviteLink(inv.code), c, 'copy');
-        row.append(c);
-      }
-      box.append(row);
-    });
-  };
-  paint();
-  REPAINT = paint;
-}
-
-$('inv-new').onclick = async () => {
-  const inv = await adminCall(() => API.api('/api/invites', { method: 'POST', auth: true, json: { ttlDays: 7 } }));
-  if (!inv) return;
-  const url = inviteLink(inv.code);
-  $('inv-link').textContent = url.replace(/^https?:\/\//, '');
-  $('inv-out').hidden = false;
-  $('inv-copy').onclick = () => copyText(url, $('inv-new'), 'inv_new');
-  loadInvites();
-};
-
-async function loadUsers() {
-  const list = await adminCall(() => API.api('/api/users', { auth: true }));
-  if (!list) return;
-  // names an admin can tick: the services that take "sign in with pathos"
-  const services = (await adminCall(() => API.api('/api/users/services', { auth: true }))) || [];
-  const paint = () => {
-    const box = $('adm-users');
-    box.innerHTML = '';
-    list.forEach((u) => {
-      const isAdmin = u.role === 'ADMIN';
-      const bits = [isAdmin ? t('role_admin') : null, u.enabled ? t('enabled') : t('disabled'), when(u.createdAt)];
-      const row = item(u.username, bits.filter(Boolean).join(' · '), u.enabled ? '' : 'dim');
-      if (!isAdmin) {
-        services.forEach((service) => {
-          const on = (u.access || []).includes(service);
-          const b = el('button', on ? 'mini on' : 'mini off', t('svc_' + service) === 'svc_' + service ? service : t('svc_' + service));
-          b.type = 'button';
-          b.setAttribute('aria-pressed', String(on));
-          b.onclick = async () => {
-            const access = on ? u.access.filter((x) => x !== service) : [...(u.access || []), service];
-            const v = await adminCall(() => API.api('/api/users/' + u.id, { method: 'PATCH', auth: true, json: { access } }));
-            if (v) { Object.assign(u, v); paint(); }
-          };
-          row.append(b);
-        });
-      }
-      if (u.id === ME.id) {
-        row.append(el('span', 'tag-pill', t('you')));
-      } else {
-        const b = el('button', u.enabled ? 'mini kill' : 'mini', t(u.enabled ? 'disable' : 'enable'));
-        b.type = 'button';
-        b.onclick = async () => {
-          const v = await adminCall(() => API.api('/api/users/' + u.id, {
-            method: 'PATCH', auth: true, json: { enabled: !u.enabled }
-          }));
-          if (v) { Object.assign(u, v); paint(); }
-        };
-        row.append(b);
-      }
-      box.append(row);
-    });
-  };
-  paint();
-  REPAINT = paint;
-}
-
-async function loadFeedback() {
-  const list = await adminCall(() => API.api('/api/feedback', { auth: true }));
-  if (!list) return;
-  const paint = () => {
-    const box = $('adm-feedback');
-    box.innerHTML = '';
-    if (!list.length) { box.append(item(t('fb_none'), '')); return; }
-    list.forEach((m) => {
-      const row = el('div', 'item top-align' + (m.readAt ? '' : ' unread'));
-      const nm = el('div', 'nm');
-      nm.append(el('span', null, when(m.createdAt)), el('pre', null, m.body));
-      row.append(nm);
-      if (!m.readAt) {
-        const b = el('button', 'mini', t('mark_read'));
-        b.type = 'button';
-        b.onclick = async () => {
-          const ok = await adminCall(() => API.api('/api/feedback/' + m.id + '/read', { method: 'POST', auth: true }));
-          if (ok !== undefined) { m.readAt = new Date().toISOString(); paint(); }
-        };
-        row.append(b);
-      }
-      box.append(row);
-    });
-  };
-  paint();
-  REPAINT = paint;
-}
-
 /* ------------------------------------------------------------ feedback */
 
 function fbClose() { $('fb').hidden = true; }
@@ -1024,7 +871,8 @@ function route() {
   else if (h === 'register') showRegister();
   else if (h.startsWith('invite/')) showRegister(h.slice('invite/'.length));
   else if (h === 'account') showAccount();
-  else if (h === 'admin') admin();
+  // the admin screen moved out; an old bookmark still lands in the right place
+  else if (h === 'admin') location.replace('https://admin.pathos.su/');
   // older links carried the lifetime as #CODE~15
   else if (h) openCode(h.split('~')[0]);
   else idle();

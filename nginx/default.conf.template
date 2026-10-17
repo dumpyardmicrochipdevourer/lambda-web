@@ -37,10 +37,9 @@ server {
     }
 
     location /api/auth/ { proxy_pass $auth; }
-    # public signing key: other services of the same accounts verify tokens with it
+    # public signing key; delta used to verify tokens through here, now it asks pathos-auth itself
     location = /.well-known/jwks.json { proxy_pass $auth; }
-    location /api/invites { proxy_pass $auth; }
-    location /api/users { proxy_pass $auth; }
+    # invites and people are not here: they are on admin.pathos.su (pathos-admin)
 
     location = /api/share {
         limit_req zone=lambda_codes burst=10 nodelay;
@@ -57,6 +56,7 @@ server {
     }
 
     location /api/files { proxy_pass $core; }
+    # anyone writes; reading and marking as read are for admins, from admin.pathos.su
     location /api/feedback { proxy_pass $core; }
 
     location /api/ { return 404; }
