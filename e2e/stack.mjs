@@ -1,8 +1,10 @@
-// End-to-end run against a live stack: node e2e/stack.mjs <base url> <admin user> <admin password> [screenshot dir]
+// End-to-end run against a live stack:
+// node e2e/stack.mjs <base url> <admin user> <admin password> <pathos-auth url> [screenshot dir]
+// The admin has no screen here any more; invites are made on pathos-auth directly, like admin.pathos.su does through its gateway.
 import { chromium } from 'playwright';
 import assert from 'node:assert/strict';
 
-const [base, adminUser, adminPassword, shots] = process.argv.slice(2);
+const [base, adminUser, adminPassword, authBase, shots] = process.argv.slice(2);
 const browser = await chromium.launch();
 const ctx = await browser.newContext({ locale: 'ru-RU', acceptDownloads: true });
 const page = await ctx.newPage();
@@ -69,7 +71,7 @@ await page.fill('#fb-who', '@e2e');
 await page.click('#fb-send');
 await page.waitForFunction(() => document.querySelector('#fb-send').textContent === 'спасибо');
 
-step('admin: sign in, invite, read feedback');
+step('admin: sign in, no admin screen, feedback is readable by the token');
 await page.goto(base + '/#login');
 await page.fill('#l-name', adminUser);
 await page.fill('#l-pw', 'wrong-password');
@@ -78,24 +80,33 @@ await page.waitForSelector('#l-err:not([hidden])');
 await page.fill('#l-pw', adminPassword);
 await page.click('#l-go');
 await page.waitForSelector('#s-files:not([hidden])');
-assert.ok(await page.isVisible('#nav-a'));
-await page.click('#nav-a');
-await page.waitForSelector('#s-admin:not([hidden])');
-await page.click('#inv-new');
-await page.waitForSelector('#inv-out:not([hidden])');
-const inviteUrl = 'http://' + (await page.textContent('#inv-link'));
-assert.match(inviteUrl, /#invite\/[0-9a-f]{64}$/);
-await page.click('[data-admin="feedback"]');
-await page.waitForSelector('#adm-feedback .item');
-assert.ok((await page.textContent('#adm-feedback')).includes('e2e feedback ' + code));
-await shot('05-admin-feedback');
-await page.click('[data-admin="users"]');
-await page.waitForSelector('#adm-users .item');
+assert.equal(await page.locator('#nav-a, #s-admin').count(), 0, 'the admin screen moved to admin.pathos.su');
+// an old #admin bookmark leads to the new address
+await page.route('https://admin.pathos.su/**', (route) => route.fulfill({ contentType: 'text/html', body: 'admin' }));
+await page.goto(base + '/#admin');
+await page.waitForURL('https://admin.pathos.su/');
+await page.unroute('https://admin.pathos.su/**');
+await page.goto(base + '/');
+await page.waitForSelector('#s-idle:not([hidden])');
+// the gateway no longer carries invites and people
+for (const path of ['/api/invites', '/api/users']) {
+  assert.equal((await page.request.get(base + path)).status(), 404, path);
+}
+const login = await page.request.post(base + '/api/auth/login', { data: { username: adminUser, password: adminPassword } });
+const adminToken = (await login.json()).accessToken;
+const inbox = await page.request.get(base + '/api/feedback', { headers: { Authorization: 'Bearer ' + adminToken } });
+assert.equal(inbox.status(), 200);
+assert.ok((await inbox.text()).includes('e2e feedback ' + code));
+assert.equal((await page.request.get(base + '/api/feedback')).status(), 401);
 await page.click('#logout');
 await page.waitForSelector('#s-idle:not([hidden])');
 
-step('register by invite');
-const invite = inviteUrl.split('#invite/')[1];
+step('register by an invite from pathos-auth');
+const authLogin = await page.request.post(authBase + '/api/auth/login', { data: { username: adminUser, password: adminPassword } });
+const authToken = (await authLogin.json()).accessToken;
+const made = await page.request.post(authBase + '/api/invites', { data: { ttlDays: 1 }, headers: { Authorization: 'Bearer ' + authToken } });
+const invite = (await made.json()).code;
+assert.match(invite, /^[0-9a-f]{64}$/);
 await page.goto(base + '/#invite/' + invite);
 assert.equal(await page.inputValue('#r-invite'), invite);
 const user = 'e2e_' + Date.now().toString(36);
@@ -107,7 +118,6 @@ await page.fill('#r-pw', 'correct horse battery');
 await page.click('#r-go');
 await page.waitForSelector('#s-files:not([hidden])');
 await page.waitForSelector('#my-empty:not([hidden])');
-assert.ok(!(await page.isVisible('#nav-a')));
 await shot('06-files-empty');
 
 step('my files: upload survives a dropped request');

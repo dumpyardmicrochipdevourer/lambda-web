@@ -227,12 +227,6 @@ form.stack{display:flex;flex-direction:column;gap:10px}
 .hint a,.lead a{color:var(--ink)}
 .item .nm span.warn{color:var(--bad)}
 .item.dim .nm b{color:var(--dim)}
-.item.unread .nm b{font-weight:600}
-.item .nm pre{margin:4px 0 0;font-family:var(--sans);font-size:14px;line-height:1.5;color:var(--ink);
-  white-space:pre-wrap;word-break:break-word}
-.item.top-align{align-items:flex-start}
-.tag-pill{flex:0 0 auto;padding:4px 10px;border-radius:999px;background:var(--sub);font-size:12px;color:var(--dim)}
-.tag-pill.bad{color:var(--bad)}
 .who button{appearance:none;border:0;background:none;padding:0;font:inherit;color:var(--dim);cursor:pointer}
 .who button:hover{color:var(--ink)}
 .row .mini{height:54px;border-radius:16px}
@@ -242,5 +236,3 @@ form.stack{display:flex;flex-direction:column;gap:10px}
 .quota .line span.warn{color:var(--bad)}
 .track i.bad{background:var(--bad)}
 button.icon{border:0;padding:0;cursor:pointer;font:inherit}
-.mini.off{background:none;box-shadow:inset 0 0 0 1px var(--line2);color:var(--dim)}
-.mini.on{background:var(--btn);color:var(--btn-ink)}
